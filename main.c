@@ -18,10 +18,6 @@
 //and for the variable that tells the threads to stop running
 ThreadsafeData program_data;
 
-void initialize(){
-    
-}
-
 int main(){
     //initialize mutex and conditional for job queue
     pthread_mutex_init(&program_data.queue_mutex, NULL);
@@ -32,13 +28,16 @@ int main(){
     //set the value directly since there's only 1 thread atm
     program_data.running = 1;
 
+    printf("Welcome to Richard and Harrison's batch job scheduler Version 1.0\n");
+    printf("Type 'help' to find more about CSUBatch commands.\n");
+
     //create both threads
     pthread_t firstThread, secondThread;
     printf("Before thread\n");
     pthread_create(&firstThread, NULL, scheduler_loop, &program_data);
     pthread_create(&secondThread, NULL, dispatcher_loop, &program_data);
     
-    printf("Threads created.\n");
+    //block until user exits
     pthread_join(firstThread, NULL);
     printf("After first thread\n");
     pthread_join(secondThread, NULL);

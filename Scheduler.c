@@ -1,5 +1,3 @@
-#include "UI.h"
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <pthread.h>
@@ -10,13 +8,14 @@
 #include <sys/wait.h>
 #include "Job.h"
 #include "ThreadsafeTypes.h"
+#include "UI.h"
 
 void* scheduler_loop(void* args){
     ThreadsafeData *program_data = (ThreadsafeData*)args;
     int running = 0;
     while(1){
         //get user input
-        Action action = get_user_input();
+        Action action = get_user_input(program_data);
         //check if the user quit
         pthread_mutex_lock(&program_data->running_mutex);
         running = program_data->running;
@@ -39,6 +38,12 @@ void* scheduler_loop(void* args){
             break;
         case(PRIORITY):
             //priority scheduling
+            break;
+        case(HELP):
+        case(LIST):
+        case(QUIT):
+        case(INVALID):
+        default:
             break;
         }
     }
