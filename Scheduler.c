@@ -9,14 +9,29 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include "Job.h"
-
+#include "ThreadsafeTypes.h"
 
 void* scheduler_loop(void* args){
+    ThreadsafeData *program_data = (ThreadsafeData*)args;
+    int running = 0;
     while(1){
-        get_user_input();
+        //get user input
+        Job* newJob = get_user_input();
+        //check if the user quit
+        pthread_mutex_lock(&program_data->running_mutex);
+        running = program_data->running;
+        pthread_mutex_unlock(&program_data->running_mutex);
+        //if the user quit, signal to dispatcher to do stuff, and exit
+        if (!running){
+            pthread_cond_signal(&program_data->work_available);
+            pthread_exit(NULL);
+        }
+        //else check if the user submitted a new job
+        if (newJob != NULL){
+            //todo do stuff
+        }
     }
-    
-    sleep(1);
+    /*
     //lock mutex
     pthread_mutex_lock(&queue_mutex);
     //insert data
@@ -26,9 +41,5 @@ void* scheduler_loop(void* args){
     pthread_cond_signal(&work_available);
     //unlock mutex
     pthread_mutex_unlock(&queue_mutex);
-    //exit?
-
-    sleep(5);
-    
-    pthread_exit(NULL);
+    //exit?*/
 }

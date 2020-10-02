@@ -9,6 +9,7 @@
 #include <sys/wait.h>
 
 #include "Job.h"
+#include "ThreadsafeTypes.h"
 
 void process_terminated(pid_t id){
     printf("todo\n");
@@ -32,24 +33,31 @@ void execute(char* parameters[]){
 }
 
 void* dispatcher_loop(void* args){
-    //lock mutex
-    pthread_mutex_lock(&queue_mutex);
-    //wait for condition to be true
-    pthread_cond_wait(&work_available, &queue_mutex);
-    //do work
-    if (!shared_job){
-        printf("Shared job is null!\n");
+    ThreadsafeData *program_data = (ThreadsafeData*)args;
+    while(1){
+        //lock mutex
+        pthread_mutex_lock(&program_data->queue_mutex);
+        //check if jobs in queue
+        JobQueueNode* head = program_data->head;
+        if (head == NULL)
+            //wait for condition to be true
+            pthread_cond_wait(&program_data->work_available, &program_data->queue_mutex);
+        //make sure program is still running
+        pthread_mutex_lock(&program_data->running_mutex);
+        int running = program_data->running;
+        pthread_mutex_unlock(&program_data->running_mutex);
+        if (!running){
+            pthread_mutex_unlock(&program_data->queue_mutex);
+            pthread_exit(NULL);
+        }
+        //get tail of list
+        JobQueueNode* jobToExecute = program_data->head;
+        while(jobToExecute->next_node != NULL){
+            jobToExecute = jobToExecute->next_node;
+        }
+        //todo remove from queue
+        pthread_mutex_unlock(&program_data->queue_mutex);
+        //execute job
+        execute(jobToExecute->job->parameter_list);    
     }
-    else if (!shared_job->executable_name){
-        printf("executable name is null!\n");
-    }
-    else if (!shared_job->parameter_list){
-        printf("parameter list is null!\n");
-    }
-    printf("Calling command...\n");
-    execute(shared_job->parameter_list);
-    
-    //unlock mutex
-    pthread_mutex_unlock(&queue_mutex);
-    pthread_exit(NULL);
 }
