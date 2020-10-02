@@ -16,7 +16,7 @@ void* scheduler_loop(void* args){
     int running = 0;
     while(1){
         //get user input
-        Job* newJob = get_user_input();
+        Action action = get_user_input();
         //check if the user quit
         pthread_mutex_lock(&program_data->running_mutex);
         running = program_data->running;
@@ -26,9 +26,20 @@ void* scheduler_loop(void* args){
             pthread_cond_signal(&program_data->work_available);
             pthread_exit(NULL);
         }
-        //else check if the user submitted a new job
-        if (newJob != NULL){
-            //todo do stuff
+        //else carry out the user's request
+        switch(action.type){
+        case(RUN):
+            //queue job
+            break;
+        case(FCFS):
+            //fcfs scheduling
+            break;
+        case(SJF):
+            //sjf scheduling
+            break;
+        case(PRIORITY):
+            //priority scheduling
+            break;
         }
     }
     /*

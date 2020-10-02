@@ -40,12 +40,13 @@ void* dispatcher_loop(void* args){
         //check if jobs in queue
         JobQueueNode* head = program_data->head;
         if (head == NULL)
-            //wait for condition to be true
+            //block until there's work to do
             pthread_cond_wait(&program_data->work_available, &program_data->queue_mutex);
-        //make sure program is still running
+        //make sure the program is still supposed to be running
         pthread_mutex_lock(&program_data->running_mutex);
         int running = program_data->running;
         pthread_mutex_unlock(&program_data->running_mutex);
+        //if program should close, close
         if (!running){
             pthread_mutex_unlock(&program_data->queue_mutex);
             pthread_exit(NULL);

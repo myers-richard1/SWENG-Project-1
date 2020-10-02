@@ -3,9 +3,11 @@
 #include <string.h>
 
 #include "Job.h"
+#include "ThreadsafeTypes.h"
 
 //Returns a NULL job if the user didnt add a new job
-Job* get_user_input(){
+//program data is used for setting running status for threads to check if they should exit
+Action get_user_input(ThreadsafeData* program_data){
     //greet the user and print instructions
     printf("Welcome to Richard and Harrison's batch job scheduler Version 1.0\n");
     printf("Type 'help' to find more about CSUBatch commands.\n");
@@ -22,8 +24,11 @@ Job* get_user_input(){
         printf("User entered \"run\"\n");
     }
     if (strcmp(userInput, "list") == 0){
-        //TODO list jobs
-        printf("User entered \"list\"\n");
+        JobQueueNode* node = program_data->head;
+        while(node){
+            printf("%s\n", node->job->executable_name);
+            node = node->next_node;
+        }
     }
     if (!strcmp(userInput, "fcfs")){
         //TODO change scheduling policy to fcfs
@@ -43,6 +48,9 @@ Job* get_user_input(){
     }
     if (!strcmp(userInput, "quit")){
         printf("User entered \"quit\"\n");
+        pthread_mutex_lock(&program_data->running_mutex);
+        program_data->running = 0;
+        pthread_mutex_unlock(&program_data->running_mutex);
     }
     if (!strcmp(userInput, "help")){
         printf("User entered \"help\"\n");
