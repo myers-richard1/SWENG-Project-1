@@ -1,55 +1,43 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <pthread.h>
+#include <unistd.h>
 #include <string.h>
 
+#include <sys/types.h>
+#include <sys/wait.h>
+
+#include "Job.h"
+#include "Scheduler.h"
+#include "Dispatcher.h"
+pthread_mutex_t queue_mutex;
+pthread_cond_t work_available;
+
+Job* shared_job;
+
+void initialize(){
+    
+}
+
 int main(){
-    //greet the user and print instructions
-    printf("Welcome to [Name]'s batch job scheduler Version 0.01\n");
-    printf("Type 'help' to find more about CSUBatch commands.\n");
+    //initialize mutex and conditional
+    pthread_mutex_init(&queue_mutex, NULL);
+    pthread_cond_init(&work_available, NULL);
 
-    //init an array for holding user input
-    char userInput[10] = "";
-    //sentinel control loop, runs while user input != "quit"
-    while (strcmp(userInput,"quit")){
-        //get user input
-        fgets(userInput, sizeof(userInput), stdin);
-        //strip trailing newline
-        userInput[strcspn(userInput, "\n")] = 0;
-        if (strstr(userInput, "run")){
-            //TODO run job
-            printf("User entered \"run\"\n");
-        }
-        if (strcmp(userInput, "list") == 0){
-            //TODO list jobs
-            printf("User entered \"list\"\n");
-        }
-        if (!strcmp(userInput, "fcfs")){
-            //TODO change scheduling policy to fcfs
-            printf("User entered \"fcfs\"\n");
-        }
-        if (!strcmp(userInput, "sjf")){
-            //TODO change scheduling policy to sjf
-            printf("User entered \"sjf\"\n");
-        }
-        if (!strcmp(userInput, "priority")){
-            //TODO change scheduling policy to priority
-            printf("User entered \"list\"\n");
-        }
-        if (strstr(userInput, "test")){
-            //TODO run test
-            printf("User entered \"test\"\n");
-        }
-        if (!strcmp(userInput, "priority")){
-            //TODO change scheduling policy to priority
-            printf("User entered \"list\"\n");
-        }
-        if (!strcmp(userInput, "quit")){
-            printf("User entered \"quit\"\n");
-        }
-        if (!strcmp(userInput, "help")){
-            //TODO print help text
-            printf("User entered \"help\"\n");
-        }
-    }
+    //create both threads
+    pthread_t firstThread, secondThread;
+    printf("Before thread\n");
+    pthread_create(&firstThread, NULL, scheduler_loop, NULL);
+    pthread_create(&secondThread, NULL, dispatcher_loop, NULL);
+    
+    printf("Joining threads...\n");
+    pthread_join(firstThread, NULL);
+    printf("After first thread\n");
+    pthread_join(secondThread, NULL);
+    printf("After second thread\n");
 
+    printf("Cleaning up...\n");
+    //cleanup
+    free(shared_job);
     printf("Exiting normally\n");
 }

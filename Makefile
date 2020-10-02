@@ -1,8 +1,12 @@
 CFLAGS = -Wall
 
+LIBS = -pthread
+
 OBJ = 	main.o\
-		LinkedListNode.o\
-		JobExecutor.o
+		Job.o\
+		UI.o\
+		Scheduler.o\
+		Dispatcher.o
 
 SRCS = $(OBJ:%.o=%.c)
 
