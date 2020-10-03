@@ -6,7 +6,8 @@ OBJ = 	main.o\
 		Job.o\
 		UI.o\
 		Scheduler.o\
-		Dispatcher.o
+		Dispatcher.o\
+		StringUtils.o
 
 SRCS = $(OBJ:%.o=%.c)
 

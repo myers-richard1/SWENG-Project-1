@@ -11,23 +11,22 @@
 #include "Job.h"
 #include "ThreadsafeTypes.h"
 
-void process_terminated(pid_t id){
-    printf("todo\n");
-}
-
-void execute(char* parameters[]){
+void execute(char* executable_name){
     pid_t child_id = fork();
     pid_t temp_id;
     int child_status;
 
+    char* parameters[2] = {executable_name, NULL};
+
     if (child_id == 0){
-        execv(parameters[0], parameters);
+        printf("Forked thread running execv on job called %s\n", executable_name);
+        //execv(executable_name, parameters);
+        execv(executable_name, parameters);
         exit(0);
     }
     else{
         do {
             temp_id = wait(&child_status);
-            if(temp_id != child_id) process_terminated(temp_id);
         } while(temp_id != child_id);
     }
 }
@@ -39,26 +38,40 @@ void* dispatcher_loop(void* args){
         pthread_mutex_lock(&program_data->queue_mutex);
         //check if jobs in queue
         JobQueueNode* head = program_data->head;
-        if (head == NULL)
+        if (!head){
             //block until there's work to do
+            printf("Dispatch: Waiting for work\n");
             pthread_cond_wait(&program_data->work_available, &program_data->queue_mutex);
+            printf("Dispatch: Awake\n");
+        }
         //make sure the program is still supposed to be running
         pthread_mutex_lock(&program_data->running_mutex);
         int running = program_data->running;
         pthread_mutex_unlock(&program_data->running_mutex);
         //if program should close, close
         if (!running){
+            printf("Dispatch: Told to exit, exiting\n");
             pthread_mutex_unlock(&program_data->queue_mutex);
             pthread_exit(NULL);
         }
-        //get tail of list
+        //get head of list
         JobQueueNode* jobToExecute = program_data->head;
-        while(jobToExecute->next_node != NULL){
-            jobToExecute = jobToExecute->next_node;
+        if (!jobToExecute){
+            printf("Error! Job to execute is null!\n");
         }
-        //todo remove from queue
+        //remove from queue
+        program_data->head = program_data->head->next_node;
+        //mark as active job
+        program_data->activeJob = jobToExecute->job;
+        //unlock mutex
         pthread_mutex_unlock(&program_data->queue_mutex);
         //execute job
-        execute(jobToExecute->job->parameter_list);    
+        printf("Dispatch: Executing job called %s\n", jobToExecute->job->executable_name);
+        execute(jobToExecute->job->executable_name); 
+        //set active job to null since we're finished with the job
+        pthread_mutex_lock(&program_data->queue_mutex);
+        program_data->activeJob = NULL;
+        pthread_mutex_unlock(&program_data->queue_mutex);
+          
     }
 }

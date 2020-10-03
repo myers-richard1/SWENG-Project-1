@@ -12,4 +12,4 @@ typedef struct Action{
     Job* job;
 } Action;
 
-Action get_user_input(ThreadsafeData* program_data);
+Action* get_user_input(ThreadsafeData* program_data);
