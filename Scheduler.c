@@ -90,7 +90,6 @@ int sort_jobs(ThreadsafeData* program_data){
     int nodecount;
     if (!program_data->head) return 0;
     while (sorted == 0){
-        printf("Queue was not sorted, running sort loop\n");
         sorted = 1;
         JobQueueNode* current_job = program_data->head;
         JobQueueNode* next_job;
@@ -127,7 +126,6 @@ int sort_jobs(ThreadsafeData* program_data){
                 }
                 break;
             case(PRIORITY):;
-                printf("Checking priority of current job (%d) vs next job (%d)\n", current_job->job->priority, current_job->next_node->job->priority);
                 //if current job has lower priority than next job, swap them
                 if (current_job->job->priority < next_job->job->priority){
                     Job* temp = current_job->job;
@@ -145,7 +143,6 @@ int sort_jobs(ThreadsafeData* program_data){
                 break;
             }
         }
-        printf("Node %d does not have a next node\n", nodecount);
     }
     nodecount++;
     return nodecount;
