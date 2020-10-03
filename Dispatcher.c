@@ -11,16 +11,19 @@
 #include "Job.h"
 #include "ThreadsafeTypes.h"
 
-void execute(char* executable_name){
+void execute(char* executable_name, char** parameters){
     pid_t child_id = fork();
     pid_t temp_id;
     int child_status;
 
-    char* parameters[2] = {executable_name, NULL};
-
     if (child_id == 0){
-        printf("Forked thread running execv on job called %s\n", executable_name);
-        //execv(executable_name, parameters);
+        if (!parameters){
+            parameters = malloc(sizeof(char*) * 2);
+            parameters[0] = executable_name;
+            parameters[1] = NULL;
+        }
+        else{
+        }
         execv(executable_name, parameters);
         exit(0);
     }
@@ -40,9 +43,7 @@ void* dispatcher_loop(void* args){
         JobQueueNode* head = program_data->head;
         if (!head){
             //block until there's work to do
-            printf("Dispatch: Waiting for work\n");
             pthread_cond_wait(&program_data->work_available, &program_data->queue_mutex);
-            printf("Dispatch: Awake\n");
         }
         //make sure the program is still supposed to be running
         pthread_mutex_lock(&program_data->running_mutex);
@@ -50,7 +51,6 @@ void* dispatcher_loop(void* args){
         pthread_mutex_unlock(&program_data->running_mutex);
         //if program should close, close
         if (!running){
-            printf("Dispatch: Told to exit, exiting\n");
             pthread_mutex_unlock(&program_data->queue_mutex);
             pthread_exit(NULL);
         }
@@ -66,8 +66,7 @@ void* dispatcher_loop(void* args){
         //unlock mutex
         pthread_mutex_unlock(&program_data->queue_mutex);
         //execute job
-        printf("Dispatch: Executing job called %s\n", jobToExecute->job->executable_name);
-        execute(jobToExecute->job->executable_name); 
+        execute(jobToExecute->job->executable_name, jobToExecute->job->parameter_list); 
         //set active job to null since we're finished with the job
         pthread_mutex_lock(&program_data->queue_mutex);
         program_data->activeJob = NULL;

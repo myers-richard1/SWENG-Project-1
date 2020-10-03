@@ -2,7 +2,7 @@
 
 typedef struct SplitString{
     int number_of_elements;
-    char* elements[5];
+    char* elements[10];
 } SplitString;
 
 SplitString split(char* source, char* delimiter);

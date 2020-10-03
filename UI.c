@@ -67,12 +67,25 @@ Action* get_user_input(ThreadsafeData* program_data){
         action->type = PRIORITY;
     }
     if (strstr(userInput, "test")){
-        //TODO run test
-        printf("User entered \"test\"\n");
-        action->type = TEST;
+        SplitString splitString = split(userInput, " "); 
+        if (splitString.number_of_elements < 5){
+            printf("Invalid number of elements for test command.\n");
+            action->type = INVALID;
+        }
+        else{
+            Test* test = malloc(sizeof(Test));
+            test->benchmark = malloc(sizeof(char) * 50);
+            strcpy(test->benchmark, splitString.elements[1]);
+            test->policy = splitString.elements[2];
+            test->number_of_jobs = atoi(splitString.elements[3]);
+            test->priority_levels = atoi(splitString.elements[4]);
+            test->min_cpu_time = atoi(splitString.elements[5]);
+            test->max_cpu_time = atoi(splitString.elements[6]);
+            action->type = TEST;
+            action->test = test;
+        }
     }
     if (!strcmp(userInput, "quit")){
-        printf("User entered \"quit\"\n");
         pthread_mutex_lock(&program_data->running_mutex);
         program_data->running = 0;
         pthread_mutex_unlock(&program_data->running_mutex);
@@ -93,6 +106,11 @@ Action* get_user_input(ThreadsafeData* program_data){
     if (action->type == RUN){
         printf("UI: Returning action with job executable name %s, jobaddress: %p\n", action->job->executable_name, action->job);
         printf("UI: address of string: %p\n", action->job->executable_name);
+    }
+
+    if (action->type == TEST){
+        printf("Returning test action for benchmark: %s\n", action->test->benchmark);
+        printf("Benchmark string is at %p\n", action->test->benchmark);
     }
     return action;
 }

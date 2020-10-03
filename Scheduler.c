@@ -22,6 +22,9 @@ void* scheduler_loop(void* args){
     while(1){
         //get user input
         Action* action = get_user_input(program_data);
+        if (action->type == TEST){
+            printf("Got: %s at address %p\n", action->test->benchmark, action->test->benchmark);
+        }
         //check if the user quit
         pthread_mutex_lock(&program_data->running_mutex);
         running = program_data->running;
@@ -36,23 +39,11 @@ void* scheduler_loop(void* args){
         //else carry out the user's request
         switch(action->type){
         case(RUN):;
-            //queue job
-            JobQueueNode* new_node = malloc(sizeof(JobQueueNode));
-            new_node->job = action->job;
-            new_node->next_node = NULL;
-            pthread_mutex_lock(&program_data->queue_mutex);
-            //if head is null, set it to the new job
-            if (!program_data->head) program_data->head = new_node;
-            else{
-                JobQueueNode* tail = program_data->head;
-                while (tail->next_node != NULL){
-                    tail = tail->next_node;
-                }
-                tail->next_node = new_node;
-            }
-            sort_jobs(program_data);
-            pthread_mutex_unlock(&program_data->queue_mutex);
-            pthread_cond_signal(&program_data->work_available);            
+            queue_job(action->job, program_data);
+            break;
+        case(TEST):
+            printf("Scheduler received test with benchmark: %s\n", action->test->benchmark);
+            beginTest(action->test, program_data);
             break;
         case(FCFS):
             sort_type = FCFS;
@@ -83,6 +74,25 @@ void* scheduler_loop(void* args){
             break;
         }
     }
+}
+
+void queue_job(Job* job, ThreadsafeData* program_data){
+    JobQueueNode* new_node = malloc(sizeof(JobQueueNode));
+    new_node->job = job;
+    new_node->next_node = NULL;
+    pthread_mutex_lock(&program_data->queue_mutex);
+    //if head is null, set it to the new job
+    if (!program_data->head) program_data->head = new_node;
+    else{
+        JobQueueNode* tail = program_data->head;
+        while (tail->next_node != NULL){
+            tail = tail->next_node;
+        }
+        tail->next_node = new_node;
+    }
+    sort_jobs(program_data);
+    pthread_mutex_unlock(&program_data->queue_mutex);
+    pthread_cond_signal(&program_data->work_available);         
 }
 
 int sort_jobs(ThreadsafeData* program_data){
@@ -146,4 +156,33 @@ int sort_jobs(ThreadsafeData* program_data){
     }
     nodecount++;
     return nodecount;
+}
+
+int randomInRange(int lower, int upper){
+    return (rand() % (upper - lower + 1)) + lower;
+}
+
+void beginTest(Test* test, ThreadsafeData* program_data){
+    if (!strcmp("fcfs", test->policy)) sort_type = FCFS;
+    if (!strcmp("priority", test->policy)) sort_type = PRIORITY;
+    if (!strcmp("sjf", test->policy)) sort_type = SJF;
+    srand(time(0));
+    for (int i = 0; i < test->number_of_jobs; i++){
+        //generate values for job
+        int priority = randomInRange(0, test->priority_levels);
+        int cputime = randomInRange(test->min_cpu_time, test->max_cpu_time);
+        Job* job = malloc(sizeof(Job));
+        job->executable_name = test->benchmark;
+        job->priority = priority;
+        job->execution_time = cputime;
+        char** parameters = malloc(sizeof(char**) * 3);
+        parameters[0] = job->executable_name;
+        char* argument = malloc(sizeof(char*) * 10);
+        sprintf(argument, "%d", cputime);
+        parameters[1] = argument;
+        parameters[2] = NULL;
+        job->parameter_list = parameters;
+        time(&job->submission_time);
+        queue_job(job, program_data);
+    }
 }
