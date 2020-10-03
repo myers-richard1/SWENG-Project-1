@@ -1,0 +1,45 @@
+Num jobs	JPS	Duration	Policy
+5	1	2	fcfs
+
+Num jobs	JPS	Duration	Policy
+10	2	4	fcfs
+
+Num jobs	JPS	Duration	Policy
+15	3	8	fcfs
+
+Num jobs	JPS	Duration	Policy
+20	4	16	fcfs
+
+Num jobs	JPS	Duration	Policy
+25	5	32	fcfs
+
+Num jobs	JPS	Duration	Policy
+5	1	2	sjf
+
+Num jobs	JPS	Duration	Policy
+10	2	4	sjf
+
+Num jobs	JPS	Duration	Policy
+15	3	8	sjf
+
+Num jobs	JPS	Duration	Policy
+20	4	16	sjf
+
+Num jobs	JPS	Duration	Policy
+25	5	32	sjf
+
+Num jobs	JPS	Duration	Policy
+5	1	2	priority
+
+Num jobs	JPS	Duration	Policy
+10	2	4	priority
+
+Num jobs	JPS	Duration	Policy
+15	3	8	priority
+
+Num jobs	JPS	Duration	Policy
+20	4	16	priority
+
+Num jobs	JPS	Duration	Policy
+25	5	32	priority
+

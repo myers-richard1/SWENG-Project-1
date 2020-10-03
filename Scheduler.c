@@ -45,6 +45,33 @@ void* scheduler_loop(void* args){
             printf("Scheduler received test with benchmark: %s\n", action->test->benchmark);
             beginTest(action->test, program_data);
             break;
+        case(EVAL):;
+            printf("Beginning evaluation.\n");
+            FILE* outputFile = fopen("performance_evaluation.txt", "w");
+            int number_of_jobs[5] = {5, 10, 15, 20, 25};
+            int jobs_per_second[5] = {1, 2, 3, 4, 5};
+            int job_durations[5] = {2, 4, 8, 16, 32};
+            char* policies[3] = {"fcfs", "sjf", "priority"};
+            for (int i = 0; i < 3; i++){
+                for (int j = 0; j < 5; j++){
+                    Test* test = malloc(sizeof(Test));
+                    test->benchmark = "batch_job";
+                    test->number_of_jobs = number_of_jobs[j];
+                    test->jobs_per_second = jobs_per_second[j];
+                    test->min_cpu_time = 1;
+                    test->max_cpu_time = job_durations[j];
+                    test->policy = policies[i];
+                    test->priority_levels = 5;
+                    fprintf(outputFile, "Num jobs\tJPS\tDuration\tPolicy\n");
+                    fprintf(outputFile, "%d\t%d\t%d\t%s\n\n", test->number_of_jobs, test->jobs_per_second,
+                        test->max_cpu_time, test->policy);
+                    beginTest(test, program_data);
+                    free(test);
+                }
+                
+            }
+            fclose(outputFile);
+            break;
         case(FCFS):
             sort_type = FCFS;
             pthread_mutex_lock(&program_data->queue_mutex);
@@ -158,7 +185,7 @@ int sort_jobs(ThreadsafeData* program_data){
     return nodecount;
 }
 
-int randomInRange(int lower, int upper){
+int randomIntInRange(int lower, int upper){
     return (rand() % (upper - lower + 1)) + lower;
 }
 
@@ -167,22 +194,28 @@ void beginTest(Test* test, ThreadsafeData* program_data){
     if (!strcmp("priority", test->policy)) sort_type = PRIORITY;
     if (!strcmp("sjf", test->policy)) sort_type = SJF;
     srand(time(0));
+    int jobs_submitted = 0;
     for (int i = 0; i < test->number_of_jobs; i++){
         //generate values for job
-        int priority = randomInRange(0, test->priority_levels);
-        int cputime = randomInRange(test->min_cpu_time, test->max_cpu_time);
+        int priority = randomIntInRange(0, test->priority_levels);
+        int cputime = randomIntInRange(test->min_cpu_time, test->max_cpu_time);
         Job* job = malloc(sizeof(Job));
         job->executable_name = test->benchmark;
         job->priority = priority;
         job->execution_time = cputime;
         char** parameters = malloc(sizeof(char**) * 3);
         parameters[0] = job->executable_name;
-        char* argument = malloc(sizeof(char*) * 10);
+        char* argument = malloc(sizeof(char*) * 50);
         sprintf(argument, "%d", cputime);
         parameters[1] = argument;
         parameters[2] = NULL;
         job->parameter_list = parameters;
         time(&job->submission_time);
         queue_job(job, program_data);
+        jobs_submitted++;
+        if (jobs_submitted == test->jobs_per_second){
+            jobs_submitted = 0;
+            sleep(1);
+        }
     }
 }

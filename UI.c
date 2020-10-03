@@ -69,7 +69,7 @@ Action* get_user_input(ThreadsafeData* program_data){
     if (strstr(userInput, "test")){
         SplitString splitString = split(userInput, " "); 
         if (splitString.number_of_elements < 5){
-            printf("Invalid number of elements for test command.\n");
+            printf("Invalid number of arguments for test command.\n");
             action->type = INVALID;
         }
         else{
@@ -81,9 +81,13 @@ Action* get_user_input(ThreadsafeData* program_data){
             test->priority_levels = atoi(splitString.elements[4]);
             test->min_cpu_time = atoi(splitString.elements[5]);
             test->max_cpu_time = atoi(splitString.elements[6]);
+            test->jobs_per_second = 0xFFFFFFFF;
             action->type = TEST;
             action->test = test;
         }
+    }
+    if (!strcmp(userInput, "eval")){
+        action->type = EVAL;
     }
     if (!strcmp(userInput, "quit")){
         pthread_mutex_lock(&program_data->running_mutex);

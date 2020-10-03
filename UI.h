@@ -4,7 +4,7 @@
 #include "ThreadsafeTypes.h"
 
 typedef enum ActionType{
-    HELP, RUN, LIST, FCFS, SJF, PRIORITY, TEST, QUIT, INVALID
+    HELP, RUN, LIST, FCFS, SJF, PRIORITY, TEST, EVAL, QUIT, INVALID
 } ActionType;
 
 typedef struct Test{
@@ -14,6 +14,7 @@ typedef struct Test{
     int priority_levels;
     int min_cpu_time;
     int max_cpu_time;
+    int jobs_per_second;
 } Test;
 
 
