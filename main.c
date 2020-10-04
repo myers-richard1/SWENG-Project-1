@@ -23,6 +23,9 @@ int main(){
     pthread_mutex_init(&program_data.queue_mutex, NULL);
     pthread_cond_init(&program_data.work_available, NULL);
 
+    //initialize conditional for test
+    pthread_cond_init(&program_data.test_finished, NULL);
+
     //initialize mutex for sentinel loop controller
     pthread_mutex_init(&program_data.running_mutex, NULL);
     //set the value directly since there's only 1 thread atm

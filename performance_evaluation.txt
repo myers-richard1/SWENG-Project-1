@@ -1,45 +1,71 @@
-Num jobs	JPS	Duration	Policy
-5	1	2	fcfs
+fcfs policy, 5 jobs, 1 jobs per second, 1 duration
+Average Response Time: 1.000000 seconds
+Throughput: 1.000000 jobs per second
+==============================
 
-Num jobs	JPS	Duration	Policy
-10	2	4	fcfs
+fcfs policy, 10 jobs, 3 jobs per second, 2 duration
+Average Response Time: 7.900000 seconds
+Throughput: 1.600000 jobs per second
+==============================
 
-Num jobs	JPS	Duration	Policy
-15	3	8	fcfs
+fcfs policy, 15 jobs, 5 jobs per second, 4 duration
+Average Response Time: 17.133333 seconds
+Throughput: 2.400000 jobs per second
+==============================
 
-Num jobs	JPS	Duration	Policy
-20	4	16	fcfs
+fcfs policy, 20 jobs, 7 jobs per second, 6 duration
+Average Response Time: 26.700000 seconds
+Throughput: 2.400000 jobs per second
+==============================
 
-Num jobs	JPS	Duration	Policy
-25	5	32	fcfs
+fcfs policy, 25 jobs, 9 jobs per second, 8 duration
+Average Response Time: 58.000000 seconds
+Throughput: 4.680000 jobs per second
+==============================
 
-Num jobs	JPS	Duration	Policy
-5	1	2	sjf
+sjf policy, 5 jobs, 1 jobs per second, 1 duration
+Average Response Time: 1.000000 seconds
+Throughput: 1.000000 jobs per second
+==============================
 
-Num jobs	JPS	Duration	Policy
-10	2	4	sjf
+sjf policy, 10 jobs, 3 jobs per second, 2 duration
+Average Response Time: 4.900000 seconds
+Throughput: 1.300000 jobs per second
+==============================
 
-Num jobs	JPS	Duration	Policy
-15	3	8	sjf
+sjf policy, 15 jobs, 5 jobs per second, 4 duration
+Average Response Time: 13.666667 seconds
+Throughput: 2.400000 jobs per second
+==============================
 
-Num jobs	JPS	Duration	Policy
-20	4	16	sjf
+sjf policy, 20 jobs, 7 jobs per second, 6 duration
+Average Response Time: 19.250000 seconds
+Throughput: 2.800000 jobs per second
+==============================
 
-Num jobs	JPS	Duration	Policy
-25	5	32	sjf
+sjf policy, 25 jobs, 9 jobs per second, 8 duration
+Average Response Time: 40.120000 seconds
+Throughput: 4.320000 jobs per second
+==============================
 
-Num jobs	JPS	Duration	Policy
-5	1	2	priority
+priority policy, 5 jobs, 1 jobs per second, 1 duration
+Average Response Time: 1.000000 seconds
+Throughput: 1.000000 jobs per second
+==============================
 
-Num jobs	JPS	Duration	Policy
-10	2	4	priority
+priority policy, 10 jobs, 3 jobs per second, 2 duration
+Average Response Time: 7.100000 seconds
+Throughput: 1.600000 jobs per second
+==============================
 
-Num jobs	JPS	Duration	Policy
-15	3	8	priority
+priority policy, 15 jobs, 5 jobs per second, 4 duration
+Average Response Time: 19.333333 seconds
+Throughput: 2.733333 jobs per second
+==============================
 
-Num jobs	JPS	Duration	Policy
-20	4	16	priority
+priority policy, 20 jobs, 7 jobs per second, 6 duration
+Average Response Time: 34.900000 seconds
+Throughput: 3.600000 jobs per second
+==============================
 
-Num jobs	JPS	Duration	Policy
-25	5	32	priority
-
+priority policy, 25 jobs, 9 jobs per second, 8 duration

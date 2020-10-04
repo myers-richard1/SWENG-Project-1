@@ -14,6 +14,21 @@
 
 int sort_type;
 
+time_t begin_time;
+int num_jobs;
+int test_begun = 0;
+
+void write_test_result(FILE* output, ThreadsafeData* program_data){
+        time_t now;
+        time(&now);
+        double elapsed = difftime(now, begin_time);
+        double jps = elapsed / num_jobs;
+        double average_response_time = program_data->total_response_time / (float)num_jobs;
+        fprintf(output, "Average Response Time: %f seconds\n", average_response_time);
+        fprintf(output, "Throughput: %f jobs per second\n", jps);
+        fprintf(output, "==============================\n\n");
+}
+
 void* scheduler_loop(void* args){
     ThreadsafeData *program_data = (ThreadsafeData*)args;
     int running = 0;
@@ -33,7 +48,9 @@ void* scheduler_loop(void* args){
         if (!running){
             printf("Scheduler exiting\n");
             //signal dispatcher thread to wake up if it happens to be waiting for work
+            pthread_mutex_lock(&program_data->queue_mutex);
             pthread_cond_signal(&program_data->work_available);
+            pthread_mutex_unlock(&program_data->queue_mutex);
             pthread_exit(NULL);
         }
         //else carry out the user's request
@@ -46,11 +63,13 @@ void* scheduler_loop(void* args){
             beginTest(action->test, program_data);
             break;
         case(EVAL):;
+            //reset performance eval file
+            FILE* output = fopen("performance_evaluation.txt", "w");
+            fclose(output);
             printf("Beginning evaluation.\n");
-            FILE* outputFile = fopen("performance_evaluation.txt", "w");
             int number_of_jobs[5] = {5, 10, 15, 20, 25};
-            int jobs_per_second[5] = {1, 2, 3, 4, 5};
-            int job_durations[5] = {2, 4, 8, 16, 32};
+            int jobs_per_second[5] = {1, 3, 5, 7, 9};
+            int job_durations[5] = {1, 2, 4, 6, 8};
             char* policies[3] = {"fcfs", "sjf", "priority"};
             for (int i = 0; i < 3; i++){
                 for (int j = 0; j < 5; j++){
@@ -62,15 +81,10 @@ void* scheduler_loop(void* args){
                     test->max_cpu_time = job_durations[j];
                     test->policy = policies[i];
                     test->priority_levels = 5;
-                    fprintf(outputFile, "Num jobs\tJPS\tDuration\tPolicy\n");
-                    fprintf(outputFile, "%d\t%d\t%d\t%s\n\n", test->number_of_jobs, test->jobs_per_second,
-                        test->max_cpu_time, test->policy);
                     beginTest(test, program_data);
                     free(test);
                 }
-                
             }
-            fclose(outputFile);
             break;
         case(FCFS):
             sort_type = FCFS;
@@ -118,8 +132,9 @@ void queue_job(Job* job, ThreadsafeData* program_data){
         tail->next_node = new_node;
     }
     sort_jobs(program_data);
+    pthread_cond_signal(&program_data->work_available);    
     pthread_mutex_unlock(&program_data->queue_mutex);
-    pthread_cond_signal(&program_data->work_available);         
+         
 }
 
 int sort_jobs(ThreadsafeData* program_data){
@@ -189,7 +204,33 @@ int randomIntInRange(int lower, int upper){
     return (rand() % (upper - lower + 1)) + lower;
 }
 
+
 void beginTest(Test* test, ThreadsafeData* program_data){
+    //check if current test is finished
+    //check if there are jobs in queue or running currently
+    pthread_mutex_lock(&program_data->queue_mutex);
+    //if either of these are not null, there's a test running and we should wait for it to finish
+    if (program_data->activeJob || program_data->head){
+        printf("Test is running, waiting until test finished to schedule next.\n");
+        //wait until test is done
+        pthread_cond_wait(&program_data->test_finished, &program_data->queue_mutex);
+    }
+    FILE* output = fopen("performance_evaluation.txt", "a");
+    if (test_begun){
+        write_test_result(output, program_data);
+        
+        program_data->total_response_time = 0.0;//reset response time while we have the mutex locked
+    }
+    fprintf(output, "%s policy, %d jobs, %d jobs per second, %d duration\n", test->policy, test->number_of_jobs,
+        test->jobs_per_second, test->max_cpu_time);
+    fclose(output);
+    
+    pthread_mutex_unlock(&program_data->queue_mutex);
+
+    time(&begin_time);
+    num_jobs = test->number_of_jobs;
+    test_begun = 1;
+    
     if (!strcmp("fcfs", test->policy)) sort_type = FCFS;
     if (!strcmp("priority", test->policy)) sort_type = PRIORITY;
     if (!strcmp("sjf", test->policy)) sort_type = SJF;
@@ -211,7 +252,9 @@ void beginTest(Test* test, ThreadsafeData* program_data){
         parameters[2] = NULL;
         job->parameter_list = parameters;
         time(&job->submission_time);
+        printf("Queueing job... ");
         queue_job(job, program_data);
+        printf("Queued\n");
         jobs_submitted++;
         if (jobs_submitted == test->jobs_per_second){
             jobs_submitted = 0;

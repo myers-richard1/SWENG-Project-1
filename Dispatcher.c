@@ -36,6 +36,7 @@ void execute(char* executable_name, char** parameters){
 
 void* dispatcher_loop(void* args){
     ThreadsafeData *program_data = (ThreadsafeData*)args;
+    
     while(1){
         //lock mutex
         pthread_mutex_lock(&program_data->queue_mutex);
@@ -43,6 +44,10 @@ void* dispatcher_loop(void* args){
         JobQueueNode* head = program_data->head;
         if (!head){
             //block until there's work to do
+            //signal that there's no work left in case the scheduler is waiting to run another test
+            printf("Dispatch: No work left, signalling and waiting for work\n");
+            pthread_cond_signal(&program_data->test_finished);
+            //wait until work is available
             pthread_cond_wait(&program_data->work_available, &program_data->queue_mutex);
         }
         //make sure the program is still supposed to be running
@@ -66,11 +71,18 @@ void* dispatcher_loop(void* args){
         //unlock mutex
         pthread_mutex_unlock(&program_data->queue_mutex);
         //execute job
+        printf("Dispatcher: Starting job\n");
         execute(jobToExecute->job->executable_name, jobToExecute->job->parameter_list); 
         //set active job to null since we're finished with the job
+        printf("Dispatcher: job finished\n");
         pthread_mutex_lock(&program_data->queue_mutex);
+        time_t end_time;
+        time(&end_time);
+        double elapsedTime = difftime(end_time, jobToExecute->job->submission_time);
+        program_data->total_response_time += elapsedTime;
         program_data->activeJob = NULL;
+        
         pthread_mutex_unlock(&program_data->queue_mutex);
-          
+        
     }
 }
