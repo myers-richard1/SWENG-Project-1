@@ -43,7 +43,6 @@ int main(){
     pthread_join(firstThread, NULL);
     pthread_join(secondThread, NULL);
 
-    printf("Cleaning up...\n");
-    //cleanup
-    printf("Exiting normally\n");
+    printf("Exiting\n");
+    return 0;
 }

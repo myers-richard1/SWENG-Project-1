@@ -13,5 +13,5 @@ int main(){
 		fprintf(fp, "\n");
 	}
 	fclose(fp);
-    sleep(50);
+    sleep(5);
 }

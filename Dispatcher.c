@@ -11,12 +11,21 @@
 #include "Job.h"
 #include "ThreadsafeTypes.h"
 
+/**
+ * This function takes an executable name and parameter list,
+ * and spawns a new process using fork(),
+ * then passes the executable name and parameters to 
+ * execv() to run it.
+ * */
 void execute(char* executable_name, char** parameters){
+    //spawn child process
     pid_t child_id = fork();
     pid_t temp_id;
     int child_status;
 
+    //if i'm the child,
     if (child_id == 0){
+        //init parameters if it's null (if the job was queued by run and has no additional params)
         if (!parameters){
             parameters = malloc(sizeof(char*) * 2);
             parameters[0] = executable_name;
@@ -27,6 +36,8 @@ void execute(char* executable_name, char** parameters){
         execv(executable_name, parameters);
         exit(0);
     }
+    //else if i'm the parent process,
+    //wait until the child is done
     else{
         do {
             temp_id = wait(&child_status);
@@ -34,32 +45,53 @@ void execute(char* executable_name, char** parameters){
     }
 }
 
+/**
+ * This method should not be called manually, but rather
+ * passed to the pthread_create function, hence the void pointer
+ * return type and arguments.
+ * 
+ * The function loops endlessly until the UI module sets the 
+ * running variable in program_data to false.
+ * 
+ * This function removes jobs from the queue and executes them,
+ * and then signals to the Scheduler that it's finished if all the jobs
+ * are done.
+ * */
 void* dispatcher_loop(void* args){
+    //get the arguments from main()
     ThreadsafeData *program_data = (ThreadsafeData*)args;
     
     while(1){
-        //lock mutex
+        //make sure the program is still supposed to be running
         pthread_mutex_lock(&program_data->queue_mutex);
+        pthread_mutex_lock(&program_data->running_mutex);
+        int running = program_data->running;
+        pthread_mutex_unlock(&program_data->running_mutex);
+        if (!running) pthread_exit(NULL);
+
         //check if jobs in queue
         JobQueueNode* head = program_data->head;
+        //if no jobs in queue,
         if (!head){
-            //block until there's work to do
             //signal that there's no work left in case the scheduler is waiting to run another test
             pthread_cond_signal(&program_data->test_finished);
             //wait until work is available
             pthread_cond_wait(&program_data->work_available, &program_data->queue_mutex);
         }
+        //if we're here, it means the user added a job OR told the program to quit while we were waiting
         //make sure the program is still supposed to be running
         pthread_mutex_lock(&program_data->running_mutex);
-        int running = program_data->running;
+        running = program_data->running;
         pthread_mutex_unlock(&program_data->running_mutex);
         //if program should close, close
         if (!running){
             pthread_mutex_unlock(&program_data->queue_mutex);
             pthread_exit(NULL);
         }
+
         //get head of list
         JobQueueNode* jobToExecute = program_data->head;
+        //error checking
         if (!jobToExecute){
             printf("Error! Job to execute is null!\n");
         }
@@ -77,6 +109,10 @@ void* dispatcher_loop(void* args){
         time(&end_time);
         double elapsedTime = difftime(end_time, jobToExecute->job->submission_time);
         program_data->total_response_time += elapsedTime;
+        //free job
+        free(program_data->activeJob);
+        //free node that was holding the job
+        free(jobToExecute);
         program_data->activeJob = NULL;
         
         pthread_mutex_unlock(&program_data->queue_mutex);
