@@ -2,6 +2,8 @@ CFLAGS = -Wall
 
 LIBS = -pthread
 
+CC = gcc
+
 OBJ = 	main.o\
 		Job.o\
 		UI.o\
@@ -13,7 +15,9 @@ OBJ = 	main.o\
 SRCS = $(OBJ:%.o=%.c)
 
 app.out: $(SRCS)
-	gcc -o $@ $(CFLAGS) $(SRCS) $(LIBS)
+	$(CC) -o $@ $(CFLAGS) $(SRCS) $(LIBS)
+	$(CC) samplejob.c -o samplejob
+	$(CC) batch_job.c -o batch_job
 
 run: app.out
 	./app.out
