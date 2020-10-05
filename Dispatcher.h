@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ThreadsafeTypes.h"
 /**
  * This function takes an executable name and parameter list,
  * and spawns a new process using fork(),
@@ -21,3 +22,6 @@ void execute(char* executable_name, char** parameters);
  * are done.
  * */
 void* dispatcher_loop(void* args);
+
+//unit test
+void test_dispatch(ThreadsafeData* program_data);

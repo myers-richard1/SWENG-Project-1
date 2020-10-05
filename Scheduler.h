@@ -35,3 +35,6 @@ int sort_jobs(ThreadsafeData* program_data);
 void process_eval();
 
 int sort_type;
+
+//unit test
+void test_scheduler(ThreadsafeData* program_data);

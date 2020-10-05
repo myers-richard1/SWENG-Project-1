@@ -205,3 +205,50 @@ int sort_jobs(ThreadsafeData* program_data){
     nodecount++;
     return nodecount;
 }
+
+void test_scheduler(ThreadsafeData* program_data){
+    sort_type = FCFS;
+    //create test job
+    Job *testJob = malloc(sizeof(Job));
+    char* executable_name = malloc(sizeof(char) * 7);
+    char* testjob = "testjob";
+    strcpy(executable_name, testjob);
+    testJob->executable_name = executable_name;
+    testJob->priority = 0;
+    testJob->execution_time = 5;
+    queue_job(testJob, program_data);
+
+    //create second test job
+    Job *testJob2 = malloc(sizeof(Job));
+    char* executable_name2 = malloc(sizeof(char) * 7);
+    strcpy(executable_name2, "slowjob");
+    testJob2->executable_name = executable_name2;
+    testJob2->priority = 100;
+    testJob2->execution_time = 100;
+    queue_job(testJob2, program_data);
+
+    //create second third job
+    Job *testJob3 = malloc(sizeof(Job));
+    char* executable_name3 = malloc(sizeof(char) * 7);
+    strcpy(executable_name3, "fastjob");
+    testJob3->executable_name = executable_name3;
+    testJob3->priority = 2;
+    testJob3->execution_time = 1;
+    queue_job(testJob3, program_data);
+
+    //check job parameters
+    if (program_data->head->job->execution_time == 5) printf("Scheduler test 1 passed\n");
+    else printf("Scheduler test 1 failed.\n");
+
+    sort_type = PRIORITY;
+    sort_jobs(program_data);
+    if (program_data->head->job->execution_time == 100) printf("Scheduler test 2 passed\n");
+    else printf("Scheduler test 2 failed.\n");
+
+    //test sorting
+    sort_type = SJF;
+    sort_jobs(program_data);
+
+    if (program_data->head->job->execution_time == 1) printf("Scheduler test 3 passed\n");
+    else printf("Scheduler test 3 failed.\n");
+}

@@ -18,7 +18,9 @@
 //and for the variable that tells the threads to stop running
 ThreadsafeData program_data;
 
-int main(){
+void run_unit_tests(ThreadsafeData* program_data);
+
+int main(int argc, char* args[]){
     //initialize mutex and conditional for job queue
     pthread_mutex_init(&program_data.queue_mutex, NULL);
     pthread_cond_init(&program_data.work_available, NULL);
@@ -30,6 +32,15 @@ int main(){
     pthread_mutex_init(&program_data.running_mutex, NULL);
     //set the value directly since there's only 1 thread atm
     program_data.running = 1;
+
+    if (argc > 1){
+        if (!strcmp(args[1], "test")){
+            printf("Program launched in test mode, beginning unit tests.\n");
+            run_unit_tests(&program_data);
+            printf("All tests finished, exiting\n");
+            return 0;
+        }
+    }
 
     printf("Welcome to Richard and Harrison's batch job scheduler Version 1.0\n");
     printf("Type 'help' to find more about CSUBatch commands.\n");
@@ -43,6 +54,12 @@ int main(){
     pthread_join(firstThread, NULL);
     pthread_join(secondThread, NULL);
 
-    printf("Exiting\n");
+    printf("Finished.\n");
     return 0;
+}
+
+void run_unit_tests(ThreadsafeData* program_data){
+    test_ui(program_data);
+    test_scheduler(program_data);
+    test_dispatch(program_data);
 }

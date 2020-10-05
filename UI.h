@@ -39,3 +39,12 @@ typedef struct Action{
  * scheduler when it's checking to see what to do next.
  * */
 Action* get_user_input(ThreadsafeData* program_data);
+
+/**
+ * This function takes a string and builds an action from it.
+ * It's separate from get_user_input to make it easier to test
+ * */
+void respond_to_user_input(ThreadsafeData* program_data, Action* action, char* userInput);
+
+//unit test
+void test_ui(ThreadsafeData* program_data);

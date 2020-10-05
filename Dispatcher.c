@@ -118,3 +118,33 @@ void* dispatcher_loop(void* args){
         pthread_mutex_unlock(&program_data->queue_mutex);
     }
 }
+
+void test_dispatch(ThreadsafeData* program_data){
+    //attempt running executable
+    char* executable_name = "/bin/touch";
+    char** params = malloc(sizeof(char*) * 2);
+    params[0] = executable_name;
+    char* filename = malloc(sizeof(char) * 4);
+    strcpy(filename, "test");
+    params[1] = filename;
+
+    execute(executable_name, params);
+    if( access( "test", F_OK ) != -1 ) {
+        printf("Dispatch test 1 passed!\n");
+        remove("test");
+    } else {
+        printf("Dispatch test 1 failed!\n");
+    }
+
+    //attempt reading shared data setting active job
+    if (program_data->head->job->execution_time == 1) printf("Dispatch test 2 passed!\n");
+    else printf("Dispatch test 1 failed!\n");
+    program_data->activeJob = program_data->head->job;
+    program_data->head = program_data->head->next_node;
+
+    if (program_data->head->job->execution_time== 5) printf("Dispatch test 3 passed\n");
+    else printf("Dispatch test 2 failed!\n");
+
+    
+    
+}

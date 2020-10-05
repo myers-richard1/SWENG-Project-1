@@ -1,6 +1,1 @@
 fcfs policy, 5 jobs, 1 jobs per second, 1 duration
-Average Response Time: 1.000000 seconds
-Throughput: 1.000000 jobs per second
-==============================
-
-fcfs policy, 10 jobs, 3 jobs per second, 2 duration

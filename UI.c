@@ -25,11 +25,22 @@ Action* get_user_input(ThreadsafeData* program_data){
     fgets(userInput, sizeof(userInput), stdin);
     //strip trailing newline
     userInput[strcspn(userInput, "\n")] = 0;
+    //this function modifies action, changing its values based on userinput
+    respond_to_user_input(program_data, action, userInput);
+    return action;
+}
+
+/**
+ * This function takes a string and builds an action from it.
+ * It's separate from get_user_input to make it easier to test
+ * */
+void respond_to_user_input(ThreadsafeData* program_data, Action* action, char* userInput){
     if (strstr(userInput, "run")){
         //if it's a run command, split the string into its parameters
         SplitString splitString = split(userInput, " ");
         if (splitString.number_of_elements < 3){
             printf("Invalid number of parameters for 'run' command.\n");
+            action->type = INVALID;
         }
         else{
             //malloc a new job and set up its parameters from the string the user supplied
@@ -125,5 +136,46 @@ Action* get_user_input(ThreadsafeData* program_data){
     if (action->type == INVALID){
         printf("Invalid input! Type 'help' to find more about CSUBatch commands.\n");
     }
-    return action;
+}
+
+//ui unit test
+void test_ui(ThreadsafeData* program_data){
+    //allocate space for arguments
+    Action *testAction = malloc(sizeof(Action));
+    char* test_string = malloc(sizeof(char) * 4);
+    //test values
+    char* firstcomefirstserve = "fcfs";
+    char* prioritystring = "priority";
+    char* shortestfirst = "sjf";
+    char* run = "run";
+
+    //begin tests
+    strcpy(test_string, firstcomefirstserve);
+    respond_to_user_input(program_data, testAction, test_string);
+    
+    if (testAction->type != FCFS) printf("UI unit test: FCFS command failed!\n");
+    else printf("UI test 1 passed\n");
+    free(test_string);
+    test_string = malloc(sizeof(char) * 10);
+
+    strcpy(test_string, prioritystring);
+    respond_to_user_input(program_data, testAction, test_string);
+    if (testAction->type != PRIORITY) printf("UI unit test: PRIORITY command failed!");
+    else printf("UI test 2 passed\n");
+    free(test_string);
+    test_string = malloc(sizeof(char) * 10);
+    
+    strcpy(test_string, shortestfirst);
+    respond_to_user_input(program_data, testAction, test_string);
+    if (testAction->type != SJF) printf("UI unit test: SJF command failed!");
+    else printf("UI test 3 passed\n");
+    free(test_string);
+    test_string = malloc(sizeof(char) * 10);
+
+    strcpy(test_string, run);
+    printf("UI test 4: The program SHOULD print 2 errors after this line.\n");
+    respond_to_user_input(program_data, testAction, test_string);
+    if (testAction->type != INVALID) printf("UI unit test: Error checking failed!\n");
+    else printf("UI test 4 passed\n");
+    free(test_string);
 }
