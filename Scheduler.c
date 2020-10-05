@@ -37,16 +37,12 @@ void* scheduler_loop(void* args){
     while(1){
         //get user input
         Action* action = get_user_input(program_data);
-        if (action->type == TEST){
-            printf("Got: %s at address %p\n", action->test->benchmark, action->test->benchmark);
-        }
         //check if the user quit
         pthread_mutex_lock(&program_data->running_mutex);
         running = program_data->running;
         pthread_mutex_unlock(&program_data->running_mutex);
         //if the user quit, signal to dispatcher to do stuff, and exit
         if (!running){
-            printf("Scheduler exiting\n");
             //signal dispatcher thread to wake up if it happens to be waiting for work
             pthread_mutex_lock(&program_data->queue_mutex);
             pthread_cond_signal(&program_data->work_available);
@@ -59,14 +55,13 @@ void* scheduler_loop(void* args){
             queue_job(action->job, program_data);
             break;
         case(TEST):
-            printf("Scheduler received test with benchmark: %s\n", action->test->benchmark);
             beginTest(action->test, program_data);
             break;
         case(EVAL):;
             //reset performance eval file
             FILE* output = fopen("performance_evaluation.txt", "w");
             fclose(output);
-            printf("Beginning evaluation.\n");
+            printf("Beginning evaluation, please wait for tests to complete.\n");
             int number_of_jobs[5] = {5, 10, 15, 20, 25};
             int jobs_per_second[5] = {1, 3, 5, 7, 9};
             int job_durations[5] = {1, 2, 4, 6, 8};
@@ -211,7 +206,7 @@ void beginTest(Test* test, ThreadsafeData* program_data){
     pthread_mutex_lock(&program_data->queue_mutex);
     //if either of these are not null, there's a test running and we should wait for it to finish
     if (program_data->activeJob || program_data->head){
-        printf("Test is running, waiting until test finished to schedule next.\n");
+        printf("Beginning test...\n");
         //wait until test is done
         pthread_cond_wait(&program_data->test_finished, &program_data->queue_mutex);
     }
@@ -252,9 +247,7 @@ void beginTest(Test* test, ThreadsafeData* program_data){
         parameters[2] = NULL;
         job->parameter_list = parameters;
         time(&job->submission_time);
-        printf("Queueing job... ");
         queue_job(job, program_data);
-        printf("Queued\n");
         jobs_submitted++;
         if (jobs_submitted == test->jobs_per_second){
             jobs_submitted = 0;

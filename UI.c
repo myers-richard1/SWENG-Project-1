@@ -106,15 +106,5 @@ Action* get_user_input(ThreadsafeData* program_data){
     if (action->type == INVALID){
         printf("Invalid input! Type 'help' to find more about CSUBatch commands.\n");
     }
-    //debug
-    if (action->type == RUN){
-        printf("UI: Returning action with job executable name %s, jobaddress: %p\n", action->job->executable_name, action->job);
-        printf("UI: address of string: %p\n", action->job->executable_name);
-    }
-
-    if (action->type == TEST){
-        printf("Returning test action for benchmark: %s\n", action->test->benchmark);
-        printf("Benchmark string is at %p\n", action->test->benchmark);
-    }
     return action;
 }

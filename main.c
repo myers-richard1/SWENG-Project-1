@@ -36,15 +36,12 @@ int main(){
 
     //create both threads
     pthread_t firstThread, secondThread;
-    printf("Before thread\n");
     pthread_create(&firstThread, NULL, scheduler_loop, &program_data);
     pthread_create(&secondThread, NULL, dispatcher_loop, &program_data);
     
     //block until user exits
     pthread_join(firstThread, NULL);
-    printf("After first thread\n");
     pthread_join(secondThread, NULL);
-    printf("After second thread\n");
 
     printf("Cleaning up...\n");
     //cleanup
