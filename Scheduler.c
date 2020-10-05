@@ -237,18 +237,18 @@ void test_scheduler(ThreadsafeData* program_data){
     queue_job(testJob3, program_data);
 
     //check job parameters
-    if (program_data->head->job->execution_time == 5) printf("Scheduler test 1 passed\n");
-    else printf("Scheduler test 1 failed.\n");
+    if (program_data->head->job->execution_time == 5) printf("Scheduler test 1 passed!\n");
+    else printf("Scheduler test 1 failed!\n");
 
     sort_type = PRIORITY;
     sort_jobs(program_data);
-    if (program_data->head->job->execution_time == 100) printf("Scheduler test 2 passed\n");
-    else printf("Scheduler test 2 failed.\n");
+    if (program_data->head->job->execution_time == 100) printf("Scheduler test 2 passed!\n");
+    else printf("Scheduler test 2 failed!\n");
 
     //test sorting
     sort_type = SJF;
     sort_jobs(program_data);
 
-    if (program_data->head->job->execution_time == 1) printf("Scheduler test 3 passed\n");
-    else printf("Scheduler test 3 failed.\n");
+    if (program_data->head->job->execution_time == 1) printf("Scheduler test 3 passed!\n");
+    else printf("Scheduler test 3 failed!n");
 }

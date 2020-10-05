@@ -23,6 +23,7 @@ User mode:
     sjf: change the scheduling policy to shortest job first.
     priority: change the scheduling policy to priority.
     test <benchmark> <policy> <num_of_jobs> <priority_levels> <min_CPU_time> <max_CPU_time>
+    eval: Run a performance eval and write results to file
     quit: exit CSUbatch
 
 The second mode is test mode, which runs the unit tests.

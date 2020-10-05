@@ -129,6 +129,7 @@ void respond_to_user_input(ThreadsafeData* program_data, Action* action, char* u
         printf("sjf: change the scheduling policy to shortest job first.\n");
         printf("priority: change the scheduling policy to priority.\n");
         printf("test <benchmark> <policy> <num_of_jobs> <priority_levels> <min_CPU_time> <max_CPU_time>\n");
+        printf("eval: run a performance eval and print the results to a file\n");
         printf("quit: exit CSUbatch\n");
         action->type = HELP;
     }
@@ -154,21 +155,21 @@ void test_ui(ThreadsafeData* program_data){
     respond_to_user_input(program_data, testAction, test_string);
     
     if (testAction->type != FCFS) printf("UI unit test: FCFS command failed!\n");
-    else printf("UI test 1 passed\n");
+    else printf("UI test 1 passed!\n");
     free(test_string);
     test_string = malloc(sizeof(char) * 10);
 
     strcpy(test_string, prioritystring);
     respond_to_user_input(program_data, testAction, test_string);
     if (testAction->type != PRIORITY) printf("UI unit test: PRIORITY command failed!");
-    else printf("UI test 2 passed\n");
+    else printf("UI test 2 passed!\n");
     free(test_string);
     test_string = malloc(sizeof(char) * 10);
     
     strcpy(test_string, shortestfirst);
     respond_to_user_input(program_data, testAction, test_string);
     if (testAction->type != SJF) printf("UI unit test: SJF command failed!");
-    else printf("UI test 3 passed\n");
+    else printf("UI test 3 passed!\n");
     free(test_string);
     test_string = malloc(sizeof(char) * 10);
 
@@ -176,6 +177,6 @@ void test_ui(ThreadsafeData* program_data){
     printf("UI test 4: The program SHOULD print 2 errors after this line.\n");
     respond_to_user_input(program_data, testAction, test_string);
     if (testAction->type != INVALID) printf("UI unit test: Error checking failed!\n");
-    else printf("UI test 4 passed\n");
+    else printf("UI test 4 passed!\n");
     free(test_string);
 }
