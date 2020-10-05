@@ -5,3 +5,4 @@ Throughput: 5.333333 jobs per second
 ==============================
 
  policy, 3 jobs, -1 jobs per second, 0 duration
+ policy, 3 jobs, -1 jobs per second, 0 duration

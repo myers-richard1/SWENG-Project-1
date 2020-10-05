@@ -131,6 +131,7 @@ void respond_to_user_input(ThreadsafeData* program_data, Action* action, char* u
         printf("test <benchmark> <policy> <num_of_jobs> <priority_levels> <min_CPU_time> <max_CPU_time>\n");
         printf("eval: run a performance eval and print the results to a file\n");
         printf("quit: exit CSUbatch\n");
+        printf("\nExample:\nrun samplejob 5 3\nor\ntest batch_job 5 3 2 4\n\n");
         action->type = HELP;
     }
     //error checking response
